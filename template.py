@@ -4,7 +4,7 @@ from pathlib import Path
 package_name="Source"
 
 list_of_files=[
-    "github/workflows/.gitkeep",
+    ".github/workflows/.gitkeep",
     f"{package_name}/__init__.py",
     f"{package_name}/components/__init__.py",
     f"{package_name}/components/data_ingestion.py",
