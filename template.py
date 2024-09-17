@@ -38,5 +38,3 @@ for filepath in list_of_files:
             pass
     else:
         print("file already exists")
-
-# here will use the file handling
