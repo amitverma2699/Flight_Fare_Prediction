@@ -21,17 +21,15 @@ class DataIngestion():
         logging.info("Data ingestion started")
 
         try:
-            train_data=pd.read_excel(Path(os.path.join("notebooks/data","train.xlsx")))
-            test_data=pd.read_excel(Path(os.path.join("notebooks/data","test.xlsx")))
+            data=pd.read_excel(Path(os.path.join("notebooks/data","train.xlsx")))
+            
 
             logging.info("Load the train and test dataset")
 
             os.makedirs(os.path.dirname(os.path.join(self.ingestion_config.train_data_path)),exist_ok=True)
-            train_data.to_csv(self.ingestion_config.train_data_path,index=False)
-            os.makedirs(os.path.dirname(os.path.join(self.ingestion_config.test_data_path)),exist_ok=True)
-            test_data.to_csv(self.ingestion_config.test_data_path,index=False)
+            data.to_csv(self.ingestion_config.train_data_path,index=False)
 
-            logging.info("Save the train and test data in Artifact folder")
+            logging.info("Save the data in Artifact folder")
 
             logging.info("Perform train test split")
             train_data,test_data=train_test_split(train_data,test_size=0.25,random_state=40)

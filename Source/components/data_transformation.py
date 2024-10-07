@@ -23,16 +23,8 @@ class DataTransformation:
         self.data_transformation_config=DataTransformationConfig()
         pass
 
-    def preprocess_data(self):
+    def preprocess_data(self,df :pd.DataFrame):
         try:
-            df=pd.read_excel("../notebooks/data/train.xlsx")
-            logging.info("Preprocess data Start")
-            # One-hot encoding the categorical columns
-            categorical_cols = ['Airline', 'Source', 'Destination', 'Route', 'Additional_Info']
-
-            # Numerical Cols
-            numerical_cols = ['Journey_Day', 'Journey_Month', 'Dep_Hour', 'Dep_Minute',
-                              'Arrival_Hour', 'Arrival_Minute', 'Duration_Minutes', 'Price']
 
             # 1. Handling missing values
             df.fillna(method='ffill', inplace=True)
@@ -55,34 +47,11 @@ class DataTransformation:
             # Converting 'Duration' into total minutes
             df['Duration_Minutes'] = df['Duration'].apply(self._convert_duration_to_minutes)
             df.drop('Duration', axis=1, inplace=True)
+
+            # 3. Encoding categorical features
+            df = self._encode_categorical_features(df)
             
-            
-            numerical_pipeline=Pipeline(
-                steps=[
-                ('imputer',SimpleImputer(strategy='median')),
-                ('scaler',StandardScaler())
-
-                ]
-
-            )
-
-            # Categorigal Pipeline
-            category_pipeline=Pipeline(
-                steps=[
-                ('imputer',SimpleImputer(strategy='most_frequent')),
-                ('onehotencoder',OneHotEncoder(categories=categorical_cols)),
-                ('scaler',StandardScaler())
-                ]
-
-            )
-
-            #preprocess Pipeline
-            preprocessor=ColumnTransformer([
-            ('numerical_pipeline',numerical_pipeline,numerical_cols),
-            ('category_pipeline',category_pipeline,categorical_cols)
-            ])
-            
-            return preprocessor
+            return df
 
             
         except Exception as e:
@@ -102,50 +71,33 @@ class DataTransformation:
             logging.info("Exception Occured in the Convertion of duration to minutes")
             raise customexception(e,sys)
         
+        
+    def _encode_categorical_features(self, df: pd.DataFrame):
+
+        try:
+            # One-hot encoding the categorical columns
+
+            categorical_cols = ['Airline', 'Source', 'Destination', 'Route', 'Additional_Info']
+
+            df = pd.get_dummies(df, columns=categorical_cols, drop_first=True)
+
+            return df
+        except Exception as e:
+            logging.info("Exception Occured in the Categorical Features")
+            raise customexception(e,sys)
     
 
-    def initiate_data_transformation(self,train_path,test_path):
+
+    def scale_numerical_features(self, df: pd.DataFrame):
         try:
-            train_df=pd.read_csv(train_path)
-            test_df=pd.read_csv(test_path)
 
-            logging.info("read train and test data complete")
-            logging.info(f"Train dataframe head : \n{train_df.head().to_string()}")
-            logging.info(f"Test dataframe head : \n{test_df.head().to_string()}")
+            numerical_cols = ['Journey_Day', 'Journey_Month', 'Dep_Hour', 'Dep_Minute',
+                          'Arrival_Hour', 'Arrival_Minute', 'Duration_Minutes', 'Price']
 
-            preprocessing_obj = self.preprocess_data()
+            scaler = StandardScaler()
+            df[numerical_cols] = scaler.fit_transform(df[numerical_cols])
 
-            target_column_name='Price'
-            drop_columns = [target_column_name]
-
-            input_feature_train_df = train_df.drop(columns=drop_columns,axis=1)
-            target_feature_train_df=train_df[target_column_name]
-            
-            
-            input_feature_test_df=test_df.drop(columns=drop_columns,axis=1)
-            target_feature_test_df=test_df[target_column_name]
-            
-            input_feature_train_arr=preprocessing_obj.fit_transform(input_feature_train_df)
-            
-            input_feature_test_arr=preprocessing_obj.transform(input_feature_test_df)
-            
-            logging.info("Applying preprocessing object on training and testing datasets.")
-            
-            train_arr = np.c_[input_feature_train_arr, np.array(target_feature_train_df)]
-            test_arr = np.c_[input_feature_test_arr, np.array(target_feature_test_df)]
-
-            save_object(
-                file_path=self.data_transformation_config.preprocessor_obj_file_path,
-                obj=preprocessing_obj
-            )
-            
-            logging.info("preprocessing pickle file saved")
-            
-            return (
-                train_arr,
-                test_arr
-            )
-        
+            return df
         except Exception as e:
-            logging.info("Exception occured in the initiate_datatransformation")
+            logging.info("Exception Occured in the Numerical Features")
             raise customexception(e,sys)
