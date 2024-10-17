@@ -24,7 +24,7 @@ class DataIngestion():
             data=pd.read_excel(Path(os.path.join("notebooks/data","train.xlsx")))
             
 
-            logging.info("Load the train and test dataset")
+            logging.info("Load the data dataset")
 
             os.makedirs(os.path.dirname(os.path.join(self.ingestion_config.train_data_path)),exist_ok=True)
             data.to_csv(self.ingestion_config.train_data_path,index=False)
@@ -32,7 +32,7 @@ class DataIngestion():
             logging.info("Save the data in Artifact folder")
 
             logging.info("Perform train test split")
-            train_data,test_data=train_test_split(train_data,test_size=0.25,random_state=40)
+            train_data,test_data=train_test_split(data,test_size=0.25,random_state=40)
 
             logging.info("train test split completed")
 
