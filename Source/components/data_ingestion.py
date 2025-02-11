@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from Source.logger import logging
-from Source.exception import customexception
+from Source.exception import CustomException
 from sklearn.model_selection import train_test_split
 from dataclasses import dataclass
 from pathlib import Path
@@ -32,7 +32,7 @@ class DataIngestion():
             logging.info("Save the data in Artifact folder")
 
             logging.info("Perform train test split")
-            train_data,test_data=train_test_split(data,test_size=0.25,random_state=40)
+            train_data,test_data=train_test_split(data,test_size=0.2,random_state=42)
 
             logging.info("train test split completed")
 
@@ -51,4 +51,4 @@ class DataIngestion():
 
         except Exception as e:
             logging.info("Exception during occured at Data Ingestion stage")
-            raise customexception(e,sys)
+            raise CustomException(e,sys)

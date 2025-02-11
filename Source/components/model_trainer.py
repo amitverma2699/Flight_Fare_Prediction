@@ -3,16 +3,16 @@ import sys
 import os
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import joblib
+import pickle
 import seaborn as sns
 from dataclasses import dataclass
 from Source.logger import logging
-from Source.exception import customexception
+from Source.exception import CustomException
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.svm import SVR
 from sklearn.metrics import  r2_score
 from Source.utils.utils import evaluate_model
 from Source.utils.utils import save_object
@@ -38,39 +38,14 @@ class ModelTrainer:
             )
 
             models={
-            'LinearRegression': LinearRegression(),
-            'DecisionTreeRegressor': DecisionTreeRegressor(),
-            'RandomForestRegressor': RandomForestRegressor(),
-            'RandomizedSearchCV' : RandomizedSearchCV()
+                "LinearRegression": LinearRegression(),
+                "Decision Tree": DecisionTreeRegressor(),
+                "Random Forest": RandomForestRegressor(),
+                "Gradient Boosting": GradientBoostingRegressor(),
+                "SVR": SVR()
             }
-
-            # Hyperparameter grid for RandomForest
-            # Number of trees in random forest
-            n_estimators = [int(x) for x in np.linspace(start = 100, stop = 1200, num = 12)]
-            # Number of features to consider at every split
-            max_features = ["auto", "sqrt"]
-            # Maximum number of levels in tree
-            max_depth = [int(x) for x in np.linspace(5, 30, num = 6)]
-            # Minimum number of samples required to split a node
-            min_samples_split = [2, 5, 10, 15, 100]
-            # Minimum number of samples required at each leaf node
-            min_samples_leaf = [1, 2, 5, 10]
-            param_grid = {
-            'n_estimators': n_estimators,
-            'max_features' : max_features, 
-            'max_depth': max_depth,
-            'min_samples_split': min_samples_split,
-            'min_samples_leaf' :min_samples_leaf
-            }
-            #Hyperparameter tuning using RandomSearchCV
-
-            Random_search = RandomizedSearchCV(estimator=RandomForestRegressor(), param_distributions= param_grid, scoring="neg_mean_squared_error",cv=3, n_jobs=1, verbose=2,random_state=42)
             
-            print("Best parameters found by RandomizedSearchCV :")
-            print(Random_search.best_params_)
-            Random_search.fit(X_train, y_train)
-            
-            model_report:dict=evaluate_model(X_train,y_train,X_test,y_test,models)
+            model_report : dict = evaluate_model(X_train,y_train,X_test,y_test,models)
             print(model_report)
             print('\n====================================================================================\n')
             logging.info(f'Model Report : {model_report}')
@@ -96,6 +71,6 @@ class ModelTrainer:
             )
         except Exception as e:
             logging.info('Exception occured at Model Training')
-            raise customexception(e,sys)
+            raise CustomException(e,sys)
 
        

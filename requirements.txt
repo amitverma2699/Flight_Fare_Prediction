@@ -5,5 +5,4 @@ Scikit-learn
 Flask
 ipykernel
 seaborn
-
--e .
+-e . # This is used for installing local package.
